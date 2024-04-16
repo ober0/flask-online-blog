@@ -35,8 +35,23 @@ class Post(db.Model):
     def __repr__(self):
         return f"<Post {self.id}>"
 
-
-
+@app.route('/delete-post')
+def delete_post():
+    user_id = request.args.get('user_id')
+    post_id = request.args.get('id')
+    if 'authorized' in session and 'id' in session:
+        if int(user_id) == int(session["id"]):
+            try:
+                Post.query.filter_by(id=post_id).delete()
+                db.session.commit()
+                return redirect(f'/user/{user_id}')
+            except Exception as ex:
+                print(ex)
+                return "Ошибка БД"
+        else:
+            return 'Нет доступа'
+    else:
+        return redirect('/')
 @app.route("/")
 def go_home():
     return redirect("/home")
@@ -47,7 +62,7 @@ def main():
     if 'authorized' in session and session['authorized']:
         user = User.query.get(session['id'])
         name = user.username
-        return render_template("main.html", name=name)
+        return render_template("main.html", name=name, id=session['id'])
     else:
         return redirect('/auth')
 
@@ -153,6 +168,11 @@ def login():
                 return render_template("login.html", text="Данные не верны")
         else:
             return render_template("login.html", text="Данные не верны")
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/auth')
 
 
 if __name__ == '__main__':

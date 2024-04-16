@@ -28,6 +28,7 @@
             overflow: hidden;
             text-align: left;
             border: 2px solid #A9A9A9;
+            position: relative;
         }
         .post img {
             width: 50%;
@@ -47,7 +48,6 @@
             color: #666;
         }
 
-
         .button-add {
             display: inline-block;
             padding: 10px 20px;
@@ -62,8 +62,8 @@
             cursor: pointer;
             transition: all 0.3s ease;
             position:absolute;
-            top:37px;
-            right:37px;
+            top:35px;
+            right:150px;
         }
 
         .button-add:hover {
@@ -75,12 +75,64 @@
             outline: none;
         }
 
+        .button-delete {
+            display: inline-block;
+            padding: 5px 10px;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            border: 2px solid #FFD700;
+            color: #FFD700;
+            background-color: transparent;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
 
+        }
+
+        .button-delete:hover {
+            background-color: #FFD700;
+            color: white;
+        }
+
+        .button-delete:focus {
+            outline: none;
+        }
+
+        .button-logout {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            border: 2px solid #FF0000;
+            color: #FF0000;
+            background-color: transparent;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            position:absolute;
+            top:35px;
+            right:35px;
+        }
+
+        .button-logout:hover {
+            background-color: #FF0000;
+            color: white;
+        }
+
+        .button-logout:focus {
+            outline: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>{{ name }}</h1>
+        <a href="/logout" class="button-logout">Выйти</a>
 
         {% if id == self_id %}
             <a href="/create-post?id={{ id }}" class="button-add">Добавить пост</a>
@@ -96,6 +148,9 @@
                     <img src="{{ url_for('static', filename='img/users-post-pictures/'+post.image_path) }}" alt="">
 
                     <p>{{ post.text }}</p>
+                    {% if id == self_id %}
+                    <a href="/delete-post?id={{ post.id }}&user_id={{ post.author_id }}" class="button-delete">Удалить</a>
+                    {% endif %}
                 </div>
             {% endfor %}
         {% endif %}
