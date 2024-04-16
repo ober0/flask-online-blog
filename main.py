@@ -1,3 +1,4 @@
+import random
 import secrets
 from flask import Flask, render_template, request, redirect, session
 from flask_sqlalchemy import SQLAlchemy
@@ -18,9 +19,21 @@ class User(db.Model):
     reg_time = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"<User {self.id}"
+        return f"<User {self.id}>"
 
 
+
+class Post(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    author_id = db.Column(db.Integer, nullable=False)
+    author_name = db.Column(db.String(300), nullable=False)
+    title = db.Column(db.String(300), nullable=False)
+    text = db.Column(db.Text, nullable=False)
+    image_path = db.Column(db.Text, nullable=True)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<Post {self.id}>"
 
 
 
@@ -31,7 +44,7 @@ def go_home():
 
 @app.route("/home")
 def main():
-    if 'authorized' in session:
+    if 'authorized' in session and session['authorized']:
         user = User.query.get(session['id'])
         name = user.username
         return render_template("main.html", name=name)
@@ -71,6 +84,56 @@ def registartion():
                 print(Ex)
                 return render_template("registration.html", text="Произошла ошибка БД")
 
+@app.route("/user/<int:id>")
+def user_profile(id):
+    if 'authorized' in session and session['authorized']:
+        if User.query.get(id):
+            name = User.query.get(id).nickname
+            try:
+                posts = Post.query.filter_by(author_id=id).order_by(Post.date.desc()).all()
+            except:
+                posts = []
+            return render_template('user_profile.html', self_id=session['id'], id=id, name=name, posts=posts)
+        else:
+            return "Пользователь не найден"
+    else:
+        return redirect("/auth")
+
+
+@app.route('/create-post', methods=["POST", "GET"])
+def create_post():
+    if 'authorized' in session and session['authorized']:
+        if request.method == "GET":
+            id = request.args.get('id')
+            if int(session['id']) == int(id):
+                User.query.get(id)
+                return render_template('create-post.html')
+            else:
+                return 'Ошибка'
+        else:
+            title = request.form['title']
+            text = request.form['text']
+            image = request.files['image']
+            file_name = f'{session["id"]}-{datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S")}'
+            image_path = f'static/img/users-post-pictures/{file_name}'
+            image.save(image_path)
+
+            print(image_path, file_name)
+
+            author_id = session['id']
+            author_name = User.query.get(author_id).nickname
+
+            post = Post(author_id=author_id, author_name=author_name, title=title, text=text, image_path=file_name)
+
+            try:
+                db.session.add(post)
+                db.session.commit()
+                return redirect(f'/user/{session["id"]}')
+            except Exception as ex:
+                print(ex)
+                return "Произошла ошибка базы данных"
+    else:
+        return redirect("/auth")
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
@@ -93,4 +156,6 @@ def login():
 
 
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)
