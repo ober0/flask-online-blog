@@ -62,7 +62,9 @@ def main():
     if 'authorized' in session and session['authorized']:
         user = User.query.get(session['id'])
         name = user.username
-        return render_template("main.html", name=name, id=session['id'])
+
+        posts = Post.query.all()
+        return render_template("main.html", name=name, id=session['id'], posts=posts)
     else:
         return redirect('/auth')
 
@@ -108,7 +110,8 @@ def user_profile(id):
                 posts = Post.query.filter_by(author_id=id).order_by(Post.date.desc()).all()
             except:
                 posts = []
-            return render_template('user_profile.html', self_id=session['id'], id=id, name=name, posts=posts)
+            self_name = User.query.get(session['id']).nickname
+            return render_template('user_profile.html', self_id=session['id'], id=id, name=name, posts=posts, self_name=self_name)
         else:
             return "Пользователь не найден"
     else:

@@ -1,159 +1,184 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ name }}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f0f0;
-        }
-        .container {
-            position:relative;
-            max-width:50%;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .post {
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            overflow: hidden;
-            text-align: left;
-            border: 2px solid #A9A9A9;
-            position: relative;
-        }
-        .post img {
-            width: 50%;
-            max-width: 100%;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-        .post h2 {
-            margin-top: 0;
-            margin-bottom: 5px;
-        }
-        .post p {
-            margin-top: 0;
-        }
-        .post .author {
-            font-style: italic;
-            color: #666;
-        }
+{%extends "base.html"%}
 
-        .button-add {
-            display: inline-block;
-            padding: 10px 20px;
-            font-size: 16px;
-            font-weight: bold;
-            text-align: center;
-            text-decoration: none;
-            border: 2px solid #4CAF50;
-            color: #4CAF50;
-            background-color: transparent;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position:absolute;
-            top:35px;
-            right:150px;
-        }
+{% block title %}
+{{ name }}
+{% endblock %}
 
-        .button-add:hover {
-            background-color: #4CAF50;
-            color: white;
-        }
 
-        .button-add:focus {
-            outline: none;
-        }
+{% block style %}
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+}
+.container {
+    position:relative;
+    max-width:50%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.post {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    overflow: hidden;
+    text-align: left;
+    border: 2px solid #A9A9A9;
+    position: relative;
+}
+.post img {
+    width: 50%;
+    max-width: 100%;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+.post h2 {
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+.post p {
+    margin-top: 0;
+}
+.post .author {
+    font-style: italic;
+    color: #666;
+}
 
-        .button-delete {
-            display: inline-block;
-            padding: 5px 10px;
-            font-size: 14px;
-            font-weight: bold;
-            text-align: center;
-            text-decoration: none;
-            border: 2px solid #FFD700;
-            color: #FFD700;
-            background-color: transparent;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+.button-add {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    border: 2px solid #4CAF50;
+    color: #4CAF50;
+    background-color: transparent;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position:absolute;
+    top:25px;
+    right:215px;
+}
 
-        }
+.button-add:hover {
+    background-color: #4CAF50;
+    color: white;
+}
 
-        .button-delete:hover {
-            background-color: #FFD700;
-            color: white;
-        }
+.button-add:focus {
+    outline: none;
+}
 
-        .button-delete:focus {
-            outline: none;
-        }
+.button-delete {
+    display: inline-block;
+    padding: 5px 10px;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    border: 2px solid #FFD700;
+    color: #FFD700;
+    background-color: transparent;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
 
-        .button-logout {
-            display: inline-block;
-            padding: 10px 20px;
-            font-size: 16px;
-            font-weight: bold;
-            text-align: center;
-            text-decoration: none;
-            border: 2px solid #FF0000;
-            color: #FF0000;
-            background-color: transparent;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
-            position:absolute;
-            top:35px;
-            right:35px;
-        }
+}
 
-        .button-logout:hover {
-            background-color: #FF0000;
-            color: white;
-        }
+.button-delete:hover {
+    background-color: #FFD700;
+    color: white;
+}
 
-        .button-logout:focus {
-            outline: none;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>{{ name }}</h1>
-        <a href="/logout" class="button-logout">Выйти</a>
+.button-delete:focus {
+    outline: none;
+}
 
-        {% if id == self_id %}
-            <a href="/create-post?id={{ id }}" class="button-add">Добавить пост</a>
-        {% endif %}
+.button-logout {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    border: 2px solid #FF0000;
+    color: #FF0000;
+    background-color: transparent;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+    position:absolute;
+    top:25px;
+    right:95px;
+}
 
-        {% if posts|length > 0 %}
-            {% for post in posts %}
-                <div class="post">
-                    <h2 class="author">{{ post.author_name }}</h2>
-                    <p>{{ post.date.strftime('%H:%M %d-%m-%y ') }}</p>
+.button-logout:hover {
+    background-color: #FF0000;
+    color: white;
+}
 
-                    <h2>{{ post.title }}</h2>
-                    <img src="{{ url_for('static', filename='img/users-post-pictures/'+post.image_path) }}" alt="">
+.button-logout:focus {
+    outline: none;
+}
+{% endblock %}
 
-                    <p>{{ post.text }}</p>
-                    {% if id == self_id %}
-                    <a href="/delete-post?id={{ post.id }}&user_id={{ post.author_id }}" class="button-delete">Удалить</a>
-                    {% endif %}
-                </div>
-            {% endfor %}
-        {% endif %}
-    </div>
-</body>
-</html>
+
+
+{% block btn %}
+<a href="/logout" class="button-logout">Выйти</a>
+
+{% if id == self_id %}
+    <a href="/create-post?id={{ id }}" class="button-add">Добавить пост</a>
+{% endif %}
+{% endblock %}
+
+
+
+{% block site_link_par %}
+position:absolute;
+right:430px;
+top:35px;
+{%endblock%}
+
+
+
+{% block body %}
+<div class="container">
+    {% if posts|length > 0 %}
+        {% for post in posts %}
+            <div class="post">
+                <h2 class="author">{{ post.author_name }}</h2>
+                <p>{{ post.date.strftime('%H:%M %d-%m-%y ') }}</p>
+
+                <h2>{{ post.title }}</h2>
+                <img src="{{ url_for('static', filename='img/users-post-pictures/'+post.image_path) }}" alt="">
+
+                <p>{{ post.text }}</p>
+                {% if id == self_id %}
+                <a href="/delete-post?id={{ post.id }}&user_id={{ post.author_id }}" class="button-delete">Удалить</a>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}
+
+
+
+{% block profileHref %}
+{{ self_id }}
+{% endblock %}
+
+
+{% block profileName %}
+{{ self_name }}
+{% endblock %}
+
