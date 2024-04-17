@@ -32,8 +32,21 @@ class Post(db.Model):
     image_path = db.Column(db.Text, nullable=True)
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
+    likes = db.relationship('Like', backref='post', lazy=True)
+
     def __repr__(self):
         return f"<Post {self.id}>"
+
+
+class Like(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+
+
+
+
+
 
 @app.route('/delete-post')
 def delete_post():
@@ -54,7 +67,27 @@ def delete_post():
         return redirect('/')
 @app.route("/")
 def go_home():
+    session['authorized'] = True
+    session["id"] = 5
     return redirect("/home")
+
+
+from flask import request, jsonify
+
+@app.route("/like-post", methods=["POST"])
+def like_post():
+    if request.method == "POST":
+        post_id = request.form.get('post_id')  # Получаем ID поста из запроса
+        # Далее ваша логика обработки лайка, например, обновление счетчика лайков в базе данных
+        # Вернем только количество лайков в качестве примера
+        return str(get_like_count(post_id))
+
+def get_like_count(post_id):
+    # Здесь вы должны реализовать вашу логику получения количества лайков для поста с указанным post_id
+    # Например, с помощью SQLAlchemy вы можете запросить количество лайков для этого поста из базы данных
+    # Пока просто возвращаем фиктивное значение
+    return 42  # Фиктивное значение для демонстрации
+
 
 
 @app.route("/home")
@@ -101,19 +134,23 @@ def registartion():
                 print(Ex)
                 return render_template("registration.html", text="Произошла ошибка БД")
 
-@app.route("/user/<int:id>")
+@app.route("/user/<int:id>", methods=["GET", "POST"])
 def user_profile(id):
     if 'authorized' in session and session['authorized']:
-        if User.query.get(id):
-            name = User.query.get(id).nickname
-            try:
-                posts = Post.query.filter_by(author_id=id).order_by(Post.date.desc()).all()
-            except:
-                posts = []
-            self_name = User.query.get(session['id']).nickname
-            return render_template('user_profile.html', self_id=session['id'], id=id, name=name, posts=posts, self_name=self_name)
+        if request.method == "GET":
+            if User.query.get(id):
+                name = User.query.get(id).nickname
+                try:
+                    posts = Post.query.filter_by(author_id=id).order_by(Post.date.desc()).all()
+                except:
+                    posts = []
+                self_name = User.query.get(session['id']).nickname
+                return render_template('user_profile.html', self_id=session['id'], id=id, name=name, posts=posts, self_name=self_name)
+            else:
+                return "Пользователь не найден"
         else:
-            return "Пользователь не найден"
+            post_id = request.form['post_id']
+            return redirect(f'/user/{id}')
     else:
         return redirect("/auth")
 
@@ -181,4 +218,5 @@ def logout():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+
     app.run(debug=True)

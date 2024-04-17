@@ -151,6 +151,21 @@ top:35px;
 
 
 {% block body %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('form').submit(function(event) {
+            event.preventDefault();  // предотвращаем отправку формы по умолчанию
+            var post_id = $(this).find("input[name='post_id']").val();  // получаем ID поста
+            $.post("/like-post", {post_id: post_id}, function(data) {
+                // обновляем счетчик лайков без перезагрузки страницы
+                $('#like-counter-' + post_id).text(data);
+            });
+        });
+    });
+</script>
+
 <div class="container">
     {% if posts|length > 0 %}
         {% for post in posts %}
@@ -162,13 +177,24 @@ top:35px;
                 <img src="{{ url_for('static', filename='img/users-post-pictures/'+post.image_path) }}" alt="">
 
                 <p>{{ post.text }}</p>
+
+                <!-- Форма для лайка -->
+                <form>
+                    <input type="hidden" name="post_id" value="{{ post.id }}">
+                    <button type="submit" class="button-like">Лайк</button>
+                </form>
+
+                <!-- Счетчик лайков -->
+                <p id="like-counter-{{ post.id }}" class="like-counter">Лайков: {{ post.likes|length }}</p>
+
                 {% if id == self_id %}
-                <a href="/delete-post?id={{ post.id }}&user_id={{ post.author_id }}" class="button-delete">Удалить</a>
+                    <a href="/delete-post?id={{ post.id }}&user_id={{ post.author_id }}" class="button-delete">Удалить</a>
                 {% endif %}
             </div>
         {% endfor %}
     {% endif %}
 </div>
+
 {% endblock %}
 
 
