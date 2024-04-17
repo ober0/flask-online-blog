@@ -63,7 +63,7 @@ def main():
         user = User.query.get(session['id'])
         name = user.username
 
-        posts = Post.query.all()
+        posts = Post.query.order_by(Post.date.desc()).all()
         return render_template("main.html", name=name, id=session['id'], posts=posts)
     else:
         return redirect('/auth')
