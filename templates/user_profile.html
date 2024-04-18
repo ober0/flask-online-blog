@@ -128,6 +128,10 @@ body {
 .button-logout:focus {
     outline: none;
 }
+
+.button-like-active{
+    background-color: pink;
+}
 {% endblock %}
 
 
@@ -155,13 +159,15 @@ top:35px;
 
 <script>
     $(document).ready(function() {
-        $('form').submit(function(event) {
-            event.preventDefault();  // предотвращаем отправку формы по умолчанию
-            var post_id = $(this).find("input[name='post_id']").val();  // получаем ID поста
+        $('form.like-form').submit(function(event) {
+            event.preventDefault();
+            var post_id = $(this).find("input[name='post_id']").val();
+            var form = $(this);
             $.post("/like-post", {post_id: post_id}, function(data) {
-                // обновляем счетчик лайков без перезагрузки страницы
                 $('#like-counter-' + post_id).text(data);
+                form.find('.button-like').toggleClass('button-like-active');
             });
+            return false;
         });
     });
 </script>
@@ -178,14 +184,21 @@ top:35px;
 
                 <p>{{ post.text }}</p>
 
-                <!-- Форма для лайка -->
-                <form>
-                    <input type="hidden" name="post_id" value="{{ post.id }}">
-                    <button type="submit" class="button-like">Лайк</button>
-                </form>
 
-                <!-- Счетчик лайков -->
-                <p id="like-counter-{{ post.id }}" class="like-counter">Лайков: {{ post.likes|length }}</p>
+                <form class="like-form">
+                        <input type="hidden" name="post_id" value="{{ post.id }}">
+                        {% if post.id in likes %}
+                        <button type="submit" class="button-like button-like-active">
+                            ❤️ <span class="like-counter" id="like-counter-{{ post.id }}">{{ post.likes|length }}</span>
+                        </button>
+                        {% else %}
+                        <button type="submit" class="button-like">
+                            ❤️ <span class="like-counter" id="like-counter-{{ post.id }}">{{ post.likes|length }}</span>
+                        </button>
+                        {% endif %}
+                    </form>
+                    <br>
+
 
                 {% if id == self_id %}
                     <a href="/delete-post?id={{ post.id }}&user_id={{ post.author_id }}" class="button-delete">Удалить</a>
@@ -194,6 +207,7 @@ top:35px;
         {% endfor %}
     {% endif %}
 </div>
+
 
 {% endblock %}
 

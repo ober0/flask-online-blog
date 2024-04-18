@@ -7,58 +7,64 @@
 
 {% block style %}
 body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f0f0;
-        }
-        .container {
-            position:relative;
-            max-width:50%;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .post {
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            overflow: hidden;
-            text-align: left;
-            border: 2px solid #A9A9A9;
-            position: relative;
-        }
-        .post img {
-            width: 50%;
-            max-width: 100%;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-        .post h2 {
-            margin-top: 0;
-            margin-bottom: 5px;
-        }
-        .post p {
-            margin-top: 0;
-        }
-        .post .author {
-            font-style: italic;
-            color: #666;
-        }
-        .user-name {
-            position: absolute;
-            top: -125px;
-            right: 50px;
-            font-size: 25px;
-            color: black;
-        }
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+}
+.container {
+    position:relative;
+    max-width:50%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.post {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    overflow: hidden;
+    text-align: left;
+    border: 2px solid #A9A9A9;
+    position: relative;
+}
+.post img {
+    width: 50%;
+    max-width: 100%;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+.post h2 {
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+.post p {
+    margin-top: 0;
+}
+.post .author {
+    font-style: italic;
+    color: #666;
+}
+.user-name {
+    position: absolute;
+    top: -125px;
+    right: 50px;
+    font-size: 25px;
+    color: black;
+}
 
-        .user-name-in-post{
-            text-decoration:none;
-        }
+.user-name-in-post{
+    text-decoration:none;
+}
+
+.button-like-active{
+    background-color: pink;
+}
+
+
 {% endblock %}
 
 
@@ -69,6 +75,27 @@ body {
 
 
 {% block body %}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('form.like-form').submit(function(event) {
+            event.preventDefault();
+            var post_id = $(this).find("input[name='post_id']").val();
+            var form = $(this);
+            $.post("/like-post", {post_id: post_id}, function(data) {
+                $('#like-counter-' + post_id).text(data);
+                form.find('.button-like').toggleClass('button-like-active');
+            });
+            return false;
+        });
+    });
+</script>
+
+
+
+
 <div class="container">
         <a class="user-name" href="/user/{{ id }}">{{ name }}</a>
         <br>
@@ -82,6 +109,21 @@ body {
                     <img src="{{ url_for('static', filename='img/users-post-pictures/'+post.image_path) }}" alt="">
 
                     <p>{{ post.text }}</p>
+
+
+                    <form class="like-form">
+                        <input type="hidden" name="post_id" value="{{ post.id }}">
+                        {% if post.id in likes %}
+                        <button type="submit" class="button-like button-like-active">
+                            ❤️ <span class="like-counter" id="like-counter-{{ post.id }}">{{ post.likes|length }}</span>
+                        </button>
+                        {% else %}
+                        <button type="submit" class="button-like">
+                            ❤️ <span class="like-counter" id="like-counter-{{ post.id }}">{{ post.likes|length }}</span>
+                        </button>
+                        {% endif %}
+                    </form>
+                    <br>
 
                 </div>
             {% endfor %}

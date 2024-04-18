@@ -56,6 +56,7 @@ def delete_post():
         if int(user_id) == int(session["id"]):
             try:
                 Post.query.filter_by(id=post_id).delete()
+                Like.query.filter_by(post_id=post_id).delete()
                 db.session.commit()
                 return redirect(f'/user/{user_id}')
             except Exception as ex:
@@ -67,26 +68,39 @@ def delete_post():
         return redirect('/')
 @app.route("/")
 def go_home():
-    session['authorized'] = True
-    session["id"] = 5
     return redirect("/home")
 
 
-from flask import request, jsonify
 
 @app.route("/like-post", methods=["POST"])
 def like_post():
     if request.method == "POST":
-        post_id = request.form.get('post_id')  # Получаем ID поста из запроса
-        # Далее ваша логика обработки лайка, например, обновление счетчика лайков в базе данных
-        # Вернем только количество лайков в качестве примера
+        post_id = request.form.get('post_id')
+        print(post_id)
+        post = Post.query.get(post_id)
+        liked_users = [like.user_id for like in post.likes]
+        if session['id'] not in liked_users:
+            like = Like(post_id=post_id, user_id=session['id'])
+            try:
+                db.session.add(like)
+                db.session.commit()
+            except Exception as ex:
+                print(ex)
+                return "Произошла ошибка БД"
+        else:
+            Like.query.filter_by(user_id=session['id']).filter_by(post_id=post_id).delete()
+            try:
+                db.session.commit()
+            except Exception as ex:
+                print(ex)
+                return "Произошла ошибка БД"
+
         return str(get_like_count(post_id))
 
 def get_like_count(post_id):
-    # Здесь вы должны реализовать вашу логику получения количества лайков для поста с указанным post_id
-    # Например, с помощью SQLAlchemy вы можете запросить количество лайков для этого поста из базы данных
-    # Пока просто возвращаем фиктивное значение
-    return 42  # Фиктивное значение для демонстрации
+    post = Post.query.get(post_id)
+    liked_users = [like.user_id for like in post.likes]
+    return len(liked_users)
 
 
 
@@ -97,7 +111,10 @@ def main():
         name = user.username
 
         posts = Post.query.order_by(Post.date.desc()).all()
-        return render_template("main.html", name=name, id=session['id'], posts=posts)
+
+        likes_list = Like.query.filter_by(user_id=session['id']).all()
+        likes = [like.post_id for like in likes_list]
+        return render_template("main.html", name=name, id=session['id'], posts=posts, likes=likes)
     else:
         return redirect('/auth')
 
